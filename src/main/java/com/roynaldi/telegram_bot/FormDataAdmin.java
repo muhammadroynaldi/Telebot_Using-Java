@@ -1,0 +1,401 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package com.roynaldi.telegram_bot;
+
+import java.sql.*;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author m_roynaldi30
+ */
+public class FormDataAdmin extends javax.swing.JFrame {
+
+    private KoneksiMysql koneksi = new KoneksiMysql();
+//    private MrBots bot = new MrBots();
+
+    /**
+     * Creates new form FormDataUser
+     */
+    public FormDataAdmin() {
+        initComponents();
+        tblAdmin.getColumnModel().getColumn(0).setMaxWidth(70);
+        this.setLocationRelativeTo(null);
+        showDataFromDatabase();
+    }
+    
+    private void kosong(){
+        txtPassword.setText("");
+        txtUsername.setText("");
+    }
+
+    private void insertDataToDatabase() {
+        try {
+            Connection connection = koneksi.getConnection();
+            String username = txtUsername.getText();
+            char[] pass = txtPassword.getPassword();
+            String password = new String(pass);
+
+            String query = "INSERT INTO admin (username, password) VALUES (?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Data inserted successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to insert data.");
+        }
+    }
+
+    private void showDataFromDatabase() {
+        Connection connection = koneksi.getConnection();
+        DefaultTableModel model = (DefaultTableModel) tblAdmin.getModel();
+        model.setRowCount(0);
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM admin");
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id_admin");
+                String keyword = resultSet.getString("username");
+                String response = resultSet.getString("password");
+                model.addRow(new Object[]{id, keyword, response});
+            }
+
+            statement.close();
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        tblAdmin.setModel(model);
+    }
+
+    private void deleteDataFromDatabase(int row) {
+        DefaultTableModel model = (DefaultTableModel) tblAdmin.getModel();
+        String username = (String) model.getValueAt(row, 1);
+
+        // Tuliskan kode untuk menghapus data dari database berdasarkan keyword
+        Connection connection = koneksi.getConnection();
+        try {
+            String query = "DELETE FROM admin WHERE username = ? ";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        model.removeRow(row);
+        btnHapus.setEnabled(false); // Menonaktifkan tombol "Delete" setelah penghapusan berhasil
+    }
+
+    private void updateDataInDatabase(int adminId) {
+        try {
+            Connection connection = koneksi.getConnection();
+            String username = txtUsername.getText();
+            char[] pass = txtPassword.getPassword();
+            String password = new String(pass);
+
+            String query = "UPDATE admin SET username = ?, password = ? WHERE id_admin = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setInt(3, adminId);
+            preparedStatement.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Data updated successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to update data.");
+        }
+    }
+
+    private int getSelectedAdminId() {
+        int selectedRow = tblAdmin.getSelectedRow();
+        int adminId = -1; // Nilai default jika tidak ada baris yang dipilih
+
+        if (selectedRow >= 0) {
+            // Mengambil nilai ID admin dari kolom pertama pada baris terpilih
+            adminId = (int) tblAdmin.getValueAt(selectedRow, 0);
+        }
+
+        return adminId;
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtUsername = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblAdmin = new javax.swing.JTable();
+        btnSimpan = new javax.swing.JButton();
+        btnHapus = new javax.swing.JButton();
+        btnReload = new javax.swing.JButton();
+        btnKeluar = new javax.swing.JButton();
+        txtPassword = new javax.swing.JPasswordField();
+        btnEdit = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        jLabel1.setText("Data Admin");
+
+        jLabel4.setText("Username");
+
+        jLabel5.setText("Password");
+
+        tblAdmin.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "id_admin", "username", "password"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblAdmin.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAdminMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblAdmin);
+
+        btnSimpan.setBackground(new java.awt.Color(102, 204, 255));
+        btnSimpan.setText("Simpan");
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanActionPerformed(evt);
+            }
+        });
+
+        btnHapus.setBackground(new java.awt.Color(204, 0, 204));
+        btnHapus.setText("Hapus");
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
+
+        btnReload.setBackground(new java.awt.Color(255, 255, 51));
+        btnReload.setText("Reload");
+        btnReload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReloadActionPerformed(evt);
+            }
+        });
+
+        btnKeluar.setBackground(new java.awt.Color(255, 0, 0));
+        btnKeluar.setText("Keluar");
+        btnKeluar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKeluarActionPerformed(evt);
+            }
+        });
+
+        btnEdit.setBackground(new java.awt.Color(102, 255, 102));
+        btnEdit.setText("Edit");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 62, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 243, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 517, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnSimpan)
+                        .addGap(31, 31, 31)
+                        .addComponent(btnHapus)
+                        .addGap(46, 46, 46)
+                        .addComponent(btnReload)
+                        .addGap(38, 38, 38)
+                        .addComponent(btnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnKeluar)))
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(169, 169, 169))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                .addGap(45, 45, 45)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSimpan)
+                    .addComponent(btnHapus)
+                    .addComponent(btnReload)
+                    .addComponent(btnKeluar)
+                    .addComponent(btnEdit))
+                .addGap(9, 9, 9))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnReloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReloadActionPerformed
+        showDataFromDatabase();
+        tblAdmin.repaint(); //efek refresh
+    }//GEN-LAST:event_btnReloadActionPerformed
+
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        insertDataToDatabase();
+        kosong();
+    }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        int selectedRow = tblAdmin.getSelectedRow();
+        if (selectedRow != -1) {
+            int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                deleteDataFromDatabase(selectedRow);
+            }
+        }
+    }//GEN-LAST:event_btnHapusActionPerformed
+
+    private void btnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeluarActionPerformed
+        new FormAdmin().setVisible(true);
+        dispose();
+    }//GEN-LAST:event_btnKeluarActionPerformed
+
+    private void tblAdminMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAdminMouseClicked
+        int selectedRow = tblAdmin.getSelectedRow();
+        if (selectedRow != -1) {
+            btnHapus.setEnabled(true); // Mengaktifkan tombol "Delete" jika ada data terpilih
+        } else {
+            btnHapus.setEnabled(false); // Menonaktifkan tombol "Delete" jika tidak ada data terpilih
+        }
+        if (selectedRow >= 0) {
+            String username = tblAdmin.getValueAt(selectedRow, 1).toString();
+            String password = tblAdmin.getValueAt(selectedRow, 2).toString();
+
+            txtUsername.setText(username);
+            txtPassword.setText(password);
+
+            // Aktifkan tombol "Edit"
+            btnEdit.setEnabled(true);
+        }
+    }//GEN-LAST:event_tblAdminMouseClicked
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        int adminId = getSelectedAdminId(); // Mendapatkan ID admin yang dipilih dari GUI
+        updateDataInDatabase(adminId);
+        kosong();
+        showDataFromDatabase();
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(FormDataAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(FormDataAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(FormDataAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(FormDataAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new FormDataAdmin().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnHapus;
+    private javax.swing.JButton btnKeluar;
+    private javax.swing.JButton btnReload;
+    private javax.swing.JButton btnSimpan;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable tblAdmin;
+    private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JTextField txtUsername;
+    // End of variables declaration//GEN-END:variables
+}
